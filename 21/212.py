@@ -38,16 +38,18 @@ dir_combis = {
 }
 
 
-def unpack(pattern):
-    out = ""
-    for i in range(len(pattern) - 1):
-        out += dir_combis[(pattern[i], pattern[i + 1])]
+def next_pad(move_count):
+    temp = {k: 0 for k in dir_combis}
+    for k, v in move_count.items():
+        temp[("A", dir_combis[k][0])] += v
+        for i in range(len(dir_combis[k]) - 1):
+            temp[(dir_combis[k][i], dir_combis[k][i + 1])] += v
 
-    return out
+    return temp
 
 
 out = 0
-with open("input2.txt", "r") as f:
+with open("input.txt", "r") as f:
     for line in f:
         num_value = int(line.strip()[:-1])
         clean = "A" + line.strip()
@@ -64,10 +66,20 @@ with open("input2.txt", "r") as f:
 
             pattern += pat + "A"
 
-        for i in range(5):
-            pattern = unpack("A" + pattern)
+        start = ("A", pattern[0])
+        button_move_count = {k: 0 for k in dir_combis}
+        button_move_count[start] += 1
+        for i in range(len(pattern) - 1):
+            button_move_count[(pattern[i], pattern[i + 1])] += 1
 
-        print(len(pattern), num_value)
-        out += len(pattern) * num_value
+        for i in range(25):
+            button_move_count = next_pad(button_move_count)
+
+        min_len = 0
+        for k, v in button_move_count.items():
+            min_len += v
+
+        print(min_len, num_value, min_len * num_value)
+        out += min_len * num_value
 
 print(out)
